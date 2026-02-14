@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURAÇÃO ---
-const API_URL = "http://127.0.0.1:8000/track";
+const API_URL = "https://profitlens-api.onrender.com/track";
 const CLINICA_ID = "clinica_odonto_01";
 const WHATSAPP_NUMBER = "5511999999999"; 
 

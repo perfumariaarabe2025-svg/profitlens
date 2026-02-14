@@ -7,7 +7,7 @@
     'use strict';
 
     // CONFIGURAÇÃO (Em produção, mude para a URL do seu Backend na Nuvem)
-    const API_URL = "http://127.0.0.1:8000/track"; 
+    const API_URL = "https://profitlens-api.onrender.com/track"; 
     const CLIENT_ID = "clinica_demo_01"; // ID do cliente (pode ser dinâmico)
 
     const Tracker = {

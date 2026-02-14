@@ -11,7 +11,7 @@ import {
   PieChart, Pie, Legend
 } from 'recharts';
 
-const API_URL = "http://127.0.0.1:8000/leads";
+const API_URL = "https://profitlens-api.onrender.com/leads";
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 

@@ -1,21 +1,44 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.routes import tracker
+from pydantic import BaseModel # Certifique-se que isso está nos imports
+from fastapi import HTTPException # Certifique-se que isso está nos imports
 
-app = FastAPI(title="ProfitLens API", version="1.0 MVP")
+# Modelo de dados que vem do Frontend
+class LoginSchema(BaseModel):
+    uid: str
+    email: str
+    nome: str = "Usuário Novo" # Valor padrão se não vier nada
 
-# Permite que qualquer site (LPs dos médicos) mande dados para cá
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Libera para todos (Vercel, Localhost, Landing Pages)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.post("/login")
+def login_user(dados: LoginSchema):
+    try:
+        # 1. Tenta buscar o usuário no Firestore pelo UID do Authentication
+        doc_ref = db.collection('usuarios').document(dados.uid)
+        doc = doc_ref.get()
 
-# Inclui as rotas
-app.include_router(tracker.router)
+        if doc.exists:
+            # 2. Se já existe, retorna os dados dele (Login Normal)
+            usuario = doc.to_dict()
+            return {
+                "status": "sucesso",
+                "mensagem": "Bem-vindo de volta!",
+                "usuario": usuario
+            }
+        else:
+            # 3. Se NÃO existe, CRIA AUTOMATICAMENTE (Primeiro Acesso)
+            novo_usuario = {
+                "uid": dados.uid,
+                "email": dados.email,
+                "nome": dados.nome,
+                "plano": "gratis", # Pode mudar depois para 'pro'
+                "criado_em": datetime.now()
+            }
+            doc_ref.set(novo_usuario)
+            
+            return {
+                "status": "sucesso",
+                "mensagem": "Conta criada automaticamente!",
+                "usuario": novo_usuario
+            }
 
-@app.get("/")
-def health_check():
-    return {"status": "online", "system": "ProfitLens ROI Master"}
+    except Exception as e:
+        print(f"Erro no login: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

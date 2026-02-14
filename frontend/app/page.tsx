@@ -1,17 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation'; // Navegação
+import { signOut, onAuthStateChanged } from "firebase/auth"; // Auth do Firebase
+import { auth } from '../lib/firebase'; // Sua configuração
 import { 
   Users, DollarSign, TrendingUp, Calendar, CheckCircle, XCircle, Clock, BarChart3, 
   CalendarDays, Loader2, Eye, Copy, Check, ExternalLink, Hash, Stethoscope, Phone,
-  PieChart as PieIcon, BarChart as BarIcon, Search, Filter, Moon, Sun
+  PieChart as PieIcon, BarChart as BarIcon, Search, Filter, Moon, Sun, LogOut
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, Legend
 } from 'recharts';
 
-const API_URL = "https://profitlens-api.onrender.com/leads"; // SEU LINK DO RENDER JÁ DEVE ESTAR AQUI
+// SEU LINK DO RENDER (Produção)
+const API_URL = "https://profitlens-api.onrender.com/leads"; 
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -30,6 +34,11 @@ type Lead = {
 };
 
 export default function ProfitLensDashboard() {
+  const router = useRouter();
+  
+  // Estados de Autenticação e Dados
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -50,12 +59,32 @@ export default function ProfitLensDashboard() {
   
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   
-  // Inputs
+  // Inputs dos Modais
   const [valorVenda, setValorVenda] = useState('');
   const [dateInput, setDateInput] = useState('');
   const [timeInput, setTimeInput] = useState('');
 
-  // --- 1. BUSCA DADOS ---
+  // --- 1. GUARDIÃO DE SEGURANÇA (FIREBASE) ---
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        setUserEmail(user.email || "");
+        fetchLeads(); // Só busca dados se estiver logado
+      } else {
+        router.push("/login"); // Chuta pro login se não tiver usuário
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  // --- 2. FUNÇÃO DE LOGOUT ---
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
+
+  // --- 3. BUSCA DADOS ---
   const fetchLeads = async () => {
     try {
       const res = await fetch(API_URL);
@@ -65,12 +94,13 @@ export default function ProfitLensDashboard() {
   };
 
   useEffect(() => {
-    fetchLeads();
-    const interval = setInterval(fetchLeads, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    if (isAuthenticated) {
+        const interval = setInterval(fetchLeads, 10000); // Atualiza a cada 10s
+        return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
 
-  // --- 2. FILTROS ---
+  // --- 4. LÓGICA DE FILTROS ---
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
       const matchesSearch = (lead.nome || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -82,7 +112,7 @@ export default function ProfitLensDashboard() {
     });
   }, [leads, searchTerm, filterStatus, filterSource]);
 
-  // --- 3. DADOS GRÁFICO ---
+  // --- 5. DADOS GRÁFICO ---
   const chartData = useMemo(() => {
     const agrupado: Record<string, number> = {};
     filteredLeads.forEach(l => {
@@ -141,6 +171,15 @@ export default function ProfitLensDashboard() {
     } catch (error) { alert("Erro ao atualizar."); }
   };
 
+  // --- TELA DE CARREGAMENTO (Enquanto verifica login) ---
+  if (!isAuthenticated) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <Loader2 className="animate-spin text-indigo-600" size={40} />
+        </div>
+    );
+  }
+
   // --- TEMAS ---
   const bgMain = darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900';
   const bgCard = darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200';
@@ -167,6 +206,8 @@ export default function ProfitLensDashboard() {
         </div>
 
         <div className="flex items-center gap-4">
+            
+            {/* Botão Dark Mode */}
             <button 
                 onClick={() => setDarkMode(!darkMode)}
                 className={`p-3 rounded-xl transition-all ${darkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
@@ -175,6 +216,16 @@ export default function ProfitLensDashboard() {
                 {darkMode ? <Sun size={22} /> : <Moon size={22} />}
             </button>
 
+            {/* Botão Logout (NOVO) */}
+            <button 
+                onClick={handleLogout}
+                className={`p-3 rounded-xl transition-all ${darkMode ? 'bg-slate-800 text-red-400 hover:bg-slate-700' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
+                title="Sair do Sistema"
+            >
+                <LogOut size={22} />
+            </button>
+
+            {/* Botão Atualizar */}
             <button onClick={fetchLeads} className={`text-base font-medium px-6 py-3 rounded-xl transition-all flex items-center gap-2 ${darkMode ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}>
                 {loading && <Loader2 className="animate-spin" size={18} />}
                 {loading ? "Sinc..." : "Atualizar"}
@@ -248,7 +299,6 @@ export default function ProfitLensDashboard() {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={darkMode ? '#334155' : '#f1f5f9'} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: darkMode ? '#94a3b8' : '#64748b', fontSize: 14}} />
                                 <YAxis axisLine={false} tickLine={false} tick={{fill: darkMode ? '#94a3b8' : '#64748b', fontSize: 14}} tickFormatter={(v) => `R$${v/1000}k`} />
-                                {/* CORREÇÃO AQUI: Mudamos 'number' para 'any' para evitar erro de build */}
                                 <Tooltip cursor={{fill: darkMode ? '#1e293b' : '#f8fafc'}} contentStyle={{backgroundColor: darkMode ? '#1e293b' : '#fff', borderColor: darkMode ? '#334155' : '#e2e8f0', color: darkMode ? '#fff' : '#000', borderRadius: '12px'}} formatter={(val: any) => `R$ ${val.toLocaleString('pt-BR')}`} />
                                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={50}>
                                     {chartData.map((e, i) => <Cell key={i} fill={i===0 ? '#4f46e5' : (darkMode ? '#64748b' : '#94a3b8')} />)}
@@ -259,7 +309,6 @@ export default function ProfitLensDashboard() {
                                 <Pie data={chartData} cx="50%" cy="50%" innerRadius={70} outerRadius={120} paddingAngle={5} dataKey="value">
                                     {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                 </Pie>
-                                {/* CORREÇÃO AQUI: Mudamos 'number' para 'any' para evitar erro de build */}
                                 <Tooltip formatter={(val: any) => `R$ ${val.toLocaleString('pt-BR')}`} contentStyle={{backgroundColor: darkMode ? '#1e293b' : '#fff', borderColor: darkMode ? '#334155' : '#e2e8f0', borderRadius: '12px'}} />
                                 <Legend wrapperStyle={{fontSize: '14px'}} />
                             </PieChart>
@@ -298,7 +347,7 @@ export default function ProfitLensDashboard() {
             </div>
         </div>
 
-        {/* TABELA DE LEADS - ÁREA AUMENTADA E FONTE MAIOR */}
+        {/* TABELA DE LEADS */}
         <div className={`rounded-3xl shadow-sm border overflow-hidden ${bgCard}`}>
             <div className={`px-8 py-6 border-b ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-slate-50/50'}`}>
                 <h2 className={`font-bold uppercase text-sm tracking-widest ${textSub}`}>Fluxo de Pacientes</h2>

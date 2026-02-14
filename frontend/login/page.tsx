@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { auth } from '../../lib/firebase'; // <--- IMPORTANDO SUA CONFIG NOVA
+import { auth } from '@/lib/firebase'; // <--- IMPORTANDO SUA CONFIG NOVA
 import { Lock, ArrowRight, Loader2, AlertCircle, TrendingUp } from 'lucide-react';
 
 export default function LoginPage() {

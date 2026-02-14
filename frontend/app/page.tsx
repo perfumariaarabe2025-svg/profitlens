@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation'; // Navegação
 import { signOut, onAuthStateChanged } from "firebase/auth"; // Auth do Firebase
-import { auth } from '@/lib/firebase'; // Sua configuração
+import { auth } from '@/lib/firebase'; // Garanta que está assim
 import { 
   Users, DollarSign, TrendingUp, Calendar, CheckCircle, XCircle, Clock, BarChart3, 
   CalendarDays, Loader2, Eye, Copy, Check, ExternalLink, Hash, Stethoscope, Phone,

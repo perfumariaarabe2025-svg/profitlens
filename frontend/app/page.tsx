@@ -181,14 +181,14 @@ export default function ProfitLensDashboard() {
   }
 
   // --- TEMAS ---
-  const bgMain = darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900';
+  const bg = darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900';
   const bgCard = darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200';
   const textTitle = darkMode ? 'text-slate-100' : 'text-slate-900';
   const textSub = darkMode ? 'text-slate-400' : 'text-slate-500';
   const inputClass = darkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400';
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 ${bgMain}`}>
+    <div className={`min-h-screen font-sans transition-colors duration-300 ${bg}`}>
       
       {/* HEADER */}
       <header className={`${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} border-b px-8 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm transition-colors duration-300`}>
@@ -346,6 +346,52 @@ export default function ProfitLensDashboard() {
                 </div>
             </div>
         </div>
+
+        {/* GERADOR DE LINKS UTM (NOVO) */}
+<div className={`p-8 rounded-3xl border shadow-sm ${bgCard} mb-8`}>
+    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${textTitle}`}>
+        <Hash className="text-indigo-500" /> Gerador de Links de Anúncio
+    </h3>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input 
+            type="text" 
+            placeholder="URL da sua Landing Page (ex: https://site.com/agendamento)" 
+            id="urlInput"
+            className={`md:col-span-2 p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}
+        />
+        <select id="sourceInput" className={`p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}>
+            <option value="instagram">Instagram Ads</option>
+            <option value="facebook">Facebook Ads</option>
+            <option value="google">Google Ads</option>
+            <option value="tiktok">TikTok Ads</option>
+        </select>
+        <input 
+            type="text" 
+            placeholder="Nome da Campanha (ex: botox_fevereiro)" 
+            id="campaignInput"
+            className={`p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}
+        />
+        <button 
+            onClick={() => {
+                const url = (document.getElementById('urlInput') as HTMLInputElement).value;
+                const source = (document.getElementById('sourceInput') as HTMLSelectElement).value;
+                const campaign = (document.getElementById('campaignInput') as HTMLInputElement).value;
+                if(!url) return alert("Digite a URL da página!");
+                
+                const finalLink = `${url}?utm_source=${source}&utm_campaign=${campaign || 'campanha_sem_nome'}`;
+                
+                navigator.clipboard.writeText(finalLink);
+                alert("Link gerado e copiado para a área de transferência! 🚀");
+            }}
+            className="md:col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200"
+        >
+            Gerar e Copiar Link para o Anúncio
+        </button>
+    </div>
+    <p className="mt-4 text-xs text-slate-400">
+        * Use este link gerado no campo <b>URL do Site</b> lá no Gerenciador de Anúncios.
+    </p>
+</div>
 
         {/* TABELA DE LEADS */}
         <div className={`rounded-3xl shadow-sm border overflow-hidden ${bgCard}`}>

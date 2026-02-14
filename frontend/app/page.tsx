@@ -7,7 +7,7 @@ import { auth } from '@/lib/firebase'; // Garanta que está assim
 import { 
   Users, DollarSign, TrendingUp, Calendar, CheckCircle, XCircle, Clock, BarChart3, 
   CalendarDays, Loader2, Eye, Copy, Check, ExternalLink, Hash, Stethoscope, Phone,
-  PieChart as PieIcon, BarChart as BarIcon, Search, Filter, Moon, Sun, LogOut
+  PieChart as PieIcon, BarChart as BarIcon, Search, Filter, Moon, Sun, LogOut, Video
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
@@ -26,6 +26,7 @@ type Lead = {
   tipo_tratamento?: string;
   utm_source: string;
   utm_campaign: string;
+  utm_content: string; // Adicionado para rastreio de criativo
   status: string;
   data_legivel: string;
   timestamp: string;
@@ -216,7 +217,7 @@ export default function ProfitLensDashboard() {
                 {darkMode ? <Sun size={22} /> : <Moon size={22} />}
             </button>
 
-            {/* Botão Logout (NOVO) */}
+            {/* Botão Logout */}
             <button 
                 onClick={handleLogout}
                 className={`p-3 rounded-xl transition-all ${darkMode ? 'bg-slate-800 text-red-400 hover:bg-slate-700' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
@@ -280,6 +281,7 @@ export default function ProfitLensDashboard() {
           <KpiCard darkMode={darkMode} icon={<BarChart3 size={28}/>} title="Conversão" value={filteredLeads.length > 0 ? `${((filteredLeads.filter(l => l.status === 'Vendido').length / filteredLeads.length) * 100).toFixed(0)}%` : "0%"} color="orange" />
         </div>
 
+        {/* GRÁFICOS E AGENDA */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* GRÁFICO */}
             <div className={`lg:col-span-2 p-8 rounded-3xl border shadow-sm h-[450px] flex flex-col ${bgCard}`}>
@@ -347,51 +349,46 @@ export default function ProfitLensDashboard() {
             </div>
         </div>
 
-        {/* GERADOR DE LINKS UTM (NOVO) */}
-<div className={`p-8 rounded-3xl border shadow-sm ${bgCard} mb-8`}>
-    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${textTitle}`}>
-        <Hash className="text-indigo-500" /> Gerador de Links de Anúncio
-    </h3>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input 
-            type="text" 
-            placeholder="URL da sua Landing Page (ex: https://site.com/agendamento)" 
-            id="urlInput"
-            className={`md:col-span-2 p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}
-        />
-        <select id="sourceInput" className={`p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}>
-            <option value="instagram">Instagram Ads</option>
-            <option value="facebook">Facebook Ads</option>
-            <option value="google">Google Ads</option>
-            <option value="tiktok">TikTok Ads</option>
-        </select>
-        <input 
-            type="text" 
-            placeholder="Nome da Campanha (ex: botox_fevereiro)" 
-            id="campaignInput"
-            className={`p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}
-        />
-        <button 
-            onClick={() => {
-                const url = (document.getElementById('urlInput') as HTMLInputElement).value;
-                const source = (document.getElementById('sourceInput') as HTMLSelectElement).value;
-                const campaign = (document.getElementById('campaignInput') as HTMLInputElement).value;
-                if(!url) return alert("Digite a URL da página!");
-                
-                const finalLink = `${url}?utm_source=${source}&utm_campaign=${campaign || 'campanha_sem_nome'}`;
-                
-                navigator.clipboard.writeText(finalLink);
-                alert("Link gerado e copiado para a área de transferência! 🚀");
-            }}
-            className="md:col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200"
-        >
-            Gerar e Copiar Link para o Anúncio
-        </button>
-    </div>
-    <p className="mt-4 text-xs text-slate-400">
-        * Use este link gerado no campo <b>URL do Site</b> lá no Gerenciador de Anúncios.
-    </p>
-</div>
+        {/* GERADOR DE LINKS UTM (ADICIONADO) */}
+        <div className={`p-8 rounded-3xl border shadow-sm ${bgCard} mb-8`}>
+            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${textTitle}`}>
+                <Hash className="text-indigo-500" /> Gerador de Links de Anúncio
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input 
+                    type="text" 
+                    placeholder="URL da sua Landing Page (ex: https://site.com/agendamento)" 
+                    id="urlInput"
+                    className={`md:col-span-2 p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}
+                />
+                <select id="sourceInput" className={`p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}>
+                    <option value="instagram">Instagram Ads</option>
+                    <option value="facebook">Facebook Ads</option>
+                    <option value="google">Google Ads</option>
+                    <option value="tiktok">TikTok Ads</option>
+                </select>
+                <input 
+                    type="text" 
+                    placeholder="Nome da Campanha (ex: botox_fevereiro)" 
+                    id="campaignInput"
+                    className={`p-4 rounded-xl border outline-none focus:ring-2 focus:ring-indigo-500 ${inputClass}`}
+                />
+                <button 
+                    onClick={() => {
+                        const url = (document.getElementById('urlInput') as HTMLInputElement).value;
+                        const source = (document.getElementById('sourceInput') as HTMLSelectElement).value;
+                        const campaign = (document.getElementById('campaignInput') as HTMLInputElement).value;
+                        if(!url) return alert("Digite a URL da página!");
+                        const finalLink = `${url}?utm_source=${source}&utm_campaign=${campaign || 'campanha_sem_nome'}&utm_content={{ad.name}}`;
+                        navigator.clipboard.writeText(finalLink);
+                        alert("Link gerado e copiado! Use o campo 'Parâmetros de URL' no Facebook.");
+                    }}
+                    className="md:col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200"
+                >
+                    Gerar e Copiar Link para o Anúncio
+                </button>
+            </div>
+        </div>
 
         {/* TABELA DE LEADS */}
         <div className={`rounded-3xl shadow-sm border overflow-hidden ${bgCard}`}>
@@ -404,6 +401,7 @@ export default function ProfitLensDashboard() {
                     <tr>
                         <th className="px-8 py-5">Entrada</th>
                         <th className="px-8 py-5">Paciente</th>
+                        <th className="px-8 py-5">Origem / Anúncio</th> {/* COLUNA ATUALIZADA */}
                         <th className="px-8 py-5">Status / Agenda</th>
                         <th className="px-8 py-5 text-right">Ação</th>
                     </tr>
@@ -417,7 +415,16 @@ export default function ProfitLensDashboard() {
                         </td>
                         <td className="px-8 py-6">
                             <div className={`font-bold text-lg mb-1 ${textTitle}`}>{lead.nome || 'S/ Nome'}</div>
-                            <div className={`text-sm capitalize ${textSub}`}>{lead.utm_source || 'Direto'}</div>
+                            <div className="text-xs text-slate-400">{lead.telefone_lead}</div>
+                        </td>
+                        <td className="px-8 py-6">
+                            <div className={`text-sm font-bold flex items-center gap-1 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`}>
+                                <ExternalLink size={14} /> {lead.utm_source || 'Direto'}
+                            </div>
+                            {/* EXIBIÇÃO DO CRIATIVO NA TABELA */}
+                            <div className={`text-[11px] font-medium uppercase mt-1 flex items-center gap-1 ${textSub}`}>
+                                <Video size={12} /> {lead.utm_content || 'Criativo não identificado'}
+                            </div>
                         </td>
                         <td className="px-8 py-6">
                             <StatusBadge status={lead.status} darkMode={darkMode} />
@@ -476,8 +483,12 @@ export default function ProfitLensDashboard() {
                         </button>
                     </div>
                     <div className="grid grid-cols-2 gap-5">
+                        <DetailCard darkMode={darkMode} icon={<Video size={18}/>} label="Criativo" value={selectedLead.utm_content || "Direto"} />
+                        <DetailCard darkMode={darkMode} icon={<ExternalLink size={18}/>} label="Origem" value={selectedLead.utm_source || "Direto"} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-5">
                         <DetailCard darkMode={darkMode} icon={<Stethoscope size={18}/>} label="Tratamento" value={selectedLead.tipo_tratamento || "Consulta"} />
-                        <DetailCard darkMode={darkMode} icon={<ExternalLink size={18}/>} label="Rede Tráfego" value={selectedLead.utm_source || "Direto"} />
+                        <DetailCard darkMode={darkMode} icon={<Hash size={18}/>} label="Campanha" value={selectedLead.utm_campaign || "N/A"} />
                     </div>
                     <button onClick={() => window.open(`https://wa.me/${selectedLead.telefone_lead.replace(/\D/g,'')}`, '_blank')} className="w-full py-5 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-green-900/20 text-lg">
                         <Phone size={24} /> Chamar no WhatsApp
@@ -493,8 +504,8 @@ export default function ProfitLensDashboard() {
           <div className={`rounded-3xl shadow-2xl p-8 w-full max-w-sm ${darkMode ? 'bg-slate-900' : 'bg-white'}`}>
             <h3 className={`text-xl font-bold mb-6 ${textTitle}`}>📅 Agendar</h3>
             <div className="space-y-4 mb-8">
-                <input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} className={`w-full rounded-2xl p-4 outline-none focus:ring-2 focus:ring-purple-500 text-lg ${inputClass}`} />
-                <input type="time" value={timeInput} onChange={(e) => setTimeInput(e.target.value)} className={`w-full rounded-2xl p-4 outline-none focus:ring-2 focus:ring-purple-500 text-lg ${inputClass}`} />
+                <input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} className={`w-full rounded-2xl p-4 outline-none focus:ring-2 focus:ring-purple-500 text-lg border ${inputClass}`} />
+                <input type="time" value={timeInput} onChange={(e) => setTimeInput(e.target.value)} className={`w-full rounded-2xl p-4 outline-none focus:ring-2 focus:ring-purple-500 text-lg border ${inputClass}`} />
             </div>
             <div className="flex flex-col gap-3">
                 <button onClick={handleSaveAgenda} className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-lg">Confirmar</button>
@@ -509,7 +520,7 @@ export default function ProfitLensDashboard() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] backdrop-blur-sm">
           <div className={`rounded-3xl shadow-2xl p-8 w-full max-w-sm ${darkMode ? 'bg-slate-900' : 'bg-white'}`}>
             <h3 className={`text-xl font-bold mb-6 ${textTitle}`}>💰 Confirmar Venda</h3>
-            <input type="number" value={valorVenda} onChange={(e) => setValorVenda(e.target.value)} className={`w-full rounded-2xl p-4 text-3xl font-bold outline-none focus:ring-2 focus:ring-green-500 mb-8 text-center ${inputClass}`} placeholder="0.00" />
+            <input type="number" value={valorVenda} onChange={(e) => setValorVenda(e.target.value)} className={`w-full rounded-2xl p-4 text-3xl font-bold outline-none focus:ring-2 focus:ring-green-500 mb-8 text-center border ${inputClass}`} placeholder="0.00" />
             <div className="flex flex-col gap-3">
                 <button onClick={() => updateLeadStatus('Vendido', { valor_venda: parseFloat(valorVenda) })} className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold text-lg">Confirmar</button>
                 <button onClick={() => setModalVendaOpen(false)} className="w-full py-3 text-slate-400 font-medium hover:text-slate-500">Cancelar</button>
@@ -541,7 +552,7 @@ function DetailCard({ icon, label, value, darkMode }: any) {
 function KpiCard({ icon, title, value, color, darkMode }: any) {
     const styles: any = { 
         blue: darkMode ? "text-blue-400 bg-blue-900/30" : "text-blue-600 bg-blue-50", 
-        green: darkMode ? "text-green-400 bg-green-900/30" : "text-green-600 bg-green-50", 
+        green: darkMode ? "text-green-400 bg-green-900/30" : "text-green-600 bg-blue-50", 
         purple: darkMode ? "text-purple-400 bg-purple-900/30" : "text-purple-600 bg-purple-50", 
         orange: darkMode ? "text-orange-400 bg-orange-900/30" : "text-orange-600 bg-orange-50" 
     };

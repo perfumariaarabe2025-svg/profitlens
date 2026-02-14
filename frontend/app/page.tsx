@@ -11,7 +11,7 @@ import {
   PieChart, Pie, Legend
 } from 'recharts';
 
-const API_URL = "https://profitlens-api.onrender.com/leads";
+const API_URL = "https://profitlens-api.onrender.com/leads"; // SEU LINK DO RENDER JÁ DEVE ESTAR AQUI
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -248,7 +248,8 @@ export default function ProfitLensDashboard() {
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={darkMode ? '#334155' : '#f1f5f9'} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: darkMode ? '#94a3b8' : '#64748b', fontSize: 14}} />
                                 <YAxis axisLine={false} tickLine={false} tick={{fill: darkMode ? '#94a3b8' : '#64748b', fontSize: 14}} tickFormatter={(v) => `R$${v/1000}k`} />
-                                <Tooltip cursor={{fill: darkMode ? '#1e293b' : '#f8fafc'}} contentStyle={{backgroundColor: darkMode ? '#1e293b' : '#fff', borderColor: darkMode ? '#334155' : '#e2e8f0', color: darkMode ? '#fff' : '#000', borderRadius: '12px'}} formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`} />
+                                {/* CORREÇÃO AQUI: Mudamos 'number' para 'any' para evitar erro de build */}
+                                <Tooltip cursor={{fill: darkMode ? '#1e293b' : '#f8fafc'}} contentStyle={{backgroundColor: darkMode ? '#1e293b' : '#fff', borderColor: darkMode ? '#334155' : '#e2e8f0', color: darkMode ? '#fff' : '#000', borderRadius: '12px'}} formatter={(val: any) => `R$ ${val.toLocaleString('pt-BR')}`} />
                                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={50}>
                                     {chartData.map((e, i) => <Cell key={i} fill={i===0 ? '#4f46e5' : (darkMode ? '#64748b' : '#94a3b8')} />)}
                                 </Bar>
@@ -258,7 +259,8 @@ export default function ProfitLensDashboard() {
                                 <Pie data={chartData} cx="50%" cy="50%" innerRadius={70} outerRadius={120} paddingAngle={5} dataKey="value">
                                     {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                 </Pie>
-                                <Tooltip formatter={(val: number) => `R$ ${val.toLocaleString('pt-BR')}`} contentStyle={{backgroundColor: darkMode ? '#1e293b' : '#fff', borderColor: darkMode ? '#334155' : '#e2e8f0', borderRadius: '12px'}} />
+                                {/* CORREÇÃO AQUI: Mudamos 'number' para 'any' para evitar erro de build */}
+                                <Tooltip formatter={(val: any) => `R$ ${val.toLocaleString('pt-BR')}`} contentStyle={{backgroundColor: darkMode ? '#1e293b' : '#fff', borderColor: darkMode ? '#334155' : '#e2e8f0', borderRadius: '12px'}} />
                                 <Legend wrapperStyle={{fontSize: '14px'}} />
                             </PieChart>
                         )}
